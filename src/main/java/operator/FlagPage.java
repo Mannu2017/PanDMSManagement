@@ -27,6 +27,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
+import javax.swing.event.MenuKeyListener;
+import javax.swing.event.MenuKeyEvent;
 
 public class FlagPage extends Thread{
 	private String empid,fullname,sysip,username;
@@ -114,6 +116,13 @@ public class FlagPage extends Thread{
 		menuBar.add(mnReport);
 		
 		JMenu mnChangePassword = new JMenu("Change Password");
+		mnChangePassword.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				ChangePass cp=new ChangePass();
+				cp.start();
+			}
+		});
 		mnChangePassword.setForeground(Color.BLACK);
 		mnChangePassword.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 14));
 		menuBar.add(mnChangePassword);

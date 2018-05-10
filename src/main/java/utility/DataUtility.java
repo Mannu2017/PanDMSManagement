@@ -1,5 +1,6 @@
 package utility;
 
+import java.security.MessageDigest;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,10 +25,20 @@ public class DataUtility {
 			if(con.isClosed()) {
 				con=DbCon.DbCon();
 			}
+			String enpass=username+pass;
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(enpass.getBytes());
+			byte[] bytes = md.digest();
+			StringBuilder sb = new StringBuilder();
+			for(int i=0; i< bytes.length ;i++)
+            {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+			
 			ResultSet rs=null;
 			CallableStatement cs=con.prepareCall("{call nsdllogin (?,?)}");
 			cs.setString(1, username);
-			cs.setString(2, pass);
+			cs.setString(2, sb.toString());
 			boolean sta=cs.execute();
 			int roweff=0;
 			while (sta || roweff!=-1) {
@@ -61,11 +72,31 @@ public class DataUtility {
 			if(con.isClosed()) {
 				con=DbCon.DbCon();
 			}
+			String enpass=usernametxt+oldpass;
+			String encp=usernametxt+conpass;
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(enpass.getBytes());
+			byte[] bytes = md.digest();
+			StringBuilder sb = new StringBuilder();
+			for(int i=0; i< bytes.length ;i++)
+            {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+			
+			MessageDigest md1 = MessageDigest.getInstance("MD5");
+			md1.update(encp.getBytes());
+			byte[] bytes1 = md1.digest();
+			StringBuilder sb1 = new StringBuilder();
+			for(int i=0; i< bytes1.length ;i++)
+            {
+                sb1.append(Integer.toString((bytes1[i] & 0xff) + 0x100, 16).substring(1));
+            }
+			
 			ResultSet rs=null;
 			CallableStatement cs=con.prepareCall("{call nsdlchpass (?,?,?)}");
 			cs.setString(1, usernametxt);
-			cs.setString(2, oldpass);
-			cs.setString(3, conpass);
+			cs.setString(2, sb.toString());
+			cs.setString(3, sb1.toString());
 			boolean sta=cs.execute();
 			int roweff=0;
 			while (sta || roweff!=-1) {
@@ -235,8 +266,49 @@ public class DataUtility {
 	}
 
 	public int SaveData(Object inward, Object ack) {
-		
-		return 0;
+		int sta=0;
+		try {
+			if(con.isClosed()) {
+				con=DbCon.DbCon();
+			}
+			System.out.println("ack: "+inward.toString()+"^"+ack.toString());
+			
+			PreparedStatement ps=con.prepareStatement("update PanNSDLWorkAssign set WorkStatis=1,UpdateDateTime=GETDATE() where InwardNo='"+inward.toString()+"' and AckNo='"+ack.toString()+"'");
+			boolean rs=ps.execute();
+			if(rs=true) {
+				sta=1;
+			} else {
+				sta=2;
+			}
+			ps.close();
+			con.close();
+		} catch (Exception e) {
+			return sta;
+		}
+		return sta;
+	}
+
+	public int RejData(Object inward, Object ack, Object Reject) {
+		int sta=0;
+		try {
+			if(con.isClosed()) {
+				con=DbCon.DbCon();
+			}
+			System.out.println("ack: "+inward.toString()+"^"+ack.toString());
+			
+			PreparedStatement ps=con.prepareStatement("update PanNSDLWorkAssign set WorkStatis=3,rejid='"+Reject.toString()+"',RejdateTime=GETDATE() where InwardNo='"+inward.toString()+"' and AckNo='"+ack.toString()+"'");
+			boolean rs=ps.execute();
+			if(rs=true) {
+				sta=1;
+			} else {
+				sta=2;
+			}
+			ps.close();
+			con.close();
+		} catch (Exception e) {
+			return sta;
+		}
+		return sta;
 	}
 
 }

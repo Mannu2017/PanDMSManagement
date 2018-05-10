@@ -166,14 +166,19 @@ public class FlagOperator extends Thread{
 			public void actionPerformed(ActionEvent e) {
 				model=(DefaultTableModel) dataview.getModel();
 				if(model.getRowCount()<=0) {
-					JOptionPane.showMessageDialog(null, "no data available in table", "Info", JOptionPane.INFORMATION_MESSAGE);
+					JOptionPane.showMessageDialog(null, "No Data Available in Table", "Info", JOptionPane.INFORMATION_MESSAGE);
 				} else {
 					int urec=utility.SaveData(model.getValueAt(0, 0),model.getValueAt(0, 1));
-					model.removeRow(dataview.getSelectedRow());
-					dataview.setRowSelectionInterval(0, 0);
-					model=(DefaultTableModel) dataview.getModel();
-					dataprocess(model.getValueAt(0, 0),model.getValueAt(0, 1));
-					
+					if(urec==1) {
+						model.removeRow(dataview.getSelectedRow());
+						dataview.setRowSelectionInterval(0, 0);
+						if(model.getRowCount()>0) {
+							dataprocess(model.getValueAt(0, 0),model.getValueAt(0, 1));
+						}
+						
+					} else if(urec==2) {
+						JOptionPane.showMessageDialog(null, "Database Error", "Info", JOptionPane.INFORMATION_MESSAGE);
+					}
 				}
 			}
 		});
@@ -184,6 +189,29 @@ public class FlagOperator extends Thread{
 		frame.getContentPane().add(btnSave);
 		
 		JButton btnReject = new JButton("Reject");
+		btnReject.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				model=(DefaultTableModel) dataview.getModel();
+				if(model.getRowCount()==0) {
+					JOptionPane.showMessageDialog(null, "No Data Available", "Info", JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					if(comboBox.getSelectedItem().equals("Rejection Type")) {
+						JOptionPane.showMessageDialog(null, "Select Rejection Type", "Info", JOptionPane.INFORMATION_MESSAGE);
+					} else {
+						int urec=utility.RejData(model.getValueAt(0, 0),model.getValueAt(0, 1),comboBox.getSelectedItem());
+						if(urec==1) {
+							model.removeRow(dataview.getSelectedRow());
+							dataview.setRowSelectionInterval(0, 0);
+							if(model.getRowCount()>0) {
+								dataprocess(model.getValueAt(0, 0),model.getValueAt(0, 1));
+							}	
+						} else if(urec==2) {
+							JOptionPane.showMessageDialog(null, "Database Error", "Info", JOptionPane.INFORMATION_MESSAGE);
+						}
+					}
+				}
+			}
+		});
 		btnReject.setForeground(new Color(102, 0, 0));
 		btnReject.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 13));
 		btnReject.setBackground(new Color(224, 255, 255));
@@ -314,17 +342,30 @@ public class FlagOperator extends Thread{
 
 	protected void dataprocess(Object inwardno, Object ackno) {
 		List<String> filepath=utility.getFilePath(ackno.toString());
-		if(filepath.size()>0) {
+		System.out.println("Size: "+filepath.size());
+		if(filepath.size()==0) {
+			JOptionPane.showMessageDialog(null, "Image Not Found", "Info", JOptionPane.INFORMATION_MESSAGE);
+//			DefaultListModel lm=new DefaultListModel();
+//			lm=(DefaultListModel) lsm.getModel();
+//			if(lm.size()>0) {
+//				lm.removeAllElements();
+//			}
+			
+		} else if (filepath.size()>0) {
 			DefaultListModel listModel = new DefaultListModel();
 			listModel.removeAllElements();
 			int count = 0;
 			for (int i = 0; i < filepath.size(); i++) {
 				try {
-					ImageIcon ii = new ImageIcon(ImageIO.read(new File(filepath.get(i).toString())));
-					Image image=ii.getImage();
-			        Image img=image.getScaledInstance(imgview.getWidth()-50, 600, Image.SCALE_SMOOTH);
-			        ImageIcon ico=new ImageIcon(img);
-			        listModel.add(count++, ico);
+					BufferedImage img=ImageIO.read(new File(filepath.get(i).toString()));
+					Image img1=img.getScaledInstance(imgview.getWidth()-50, 600, Image.SCALE_SMOOTH);
+					ImageIcon ico=new ImageIcon(img1);
+					listModel.add(count++, ico);
+//					ImageIcon ii = new ImageIcon(ImageIO.read(new File(filepath.get(i).toString())));
+//					Image image=ii.getImage();
+//			        Image img=image.getScaledInstance(imgview.getWidth()-50, 600, Image.SCALE_SMOOTH);
+//			        ImageIcon ico=new ImageIcon(img);
+//			        listModel.add(count++, ico);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -332,9 +373,6 @@ public class FlagOperator extends Thread{
 			lsm = new JList(listModel);
 		    lsm.setVisibleRowCount(1);
 		    imgview.setViewportView(lsm);
-		} else {
-			lsm.removeAll();
-			JOptionPane.showMessageDialog(null, "Image Not Found", "Info", JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
