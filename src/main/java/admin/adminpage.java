@@ -1,6 +1,13 @@
-package operator;
+package admin;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Timer;
@@ -9,39 +16,26 @@ import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-
-import java.awt.Font;
-import java.awt.Image;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 
+import operator.ChangePass;
 import utility.DataUtility;
 
-import javax.swing.JMenu;
-import java.awt.Color;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JButton;
-import javax.swing.event.MenuKeyListener;
-import javax.swing.event.MenuKeyEvent;
 
-public class FlagPage extends Thread{
+public class adminpage extends Thread{
 	private String empid,fullname,sysip,username;
 	InetAddress ipAddr;
 	DataUtility utility=new DataUtility();
-	
-	public FlagPage(String empid, String fullname, String logip, String username) {
+
+	public adminpage(String empid, String fullname, String logip, String text) {
 		this.empid=empid;
 		this.fullname=fullname;
 		this.sysip=logip;
-		this.username=username;
+		this.username=text;
 	}
-
+	
 	/**
 	 * @wbp.parser.entryPoint
 	 */
@@ -57,11 +51,11 @@ public class FlagPage extends Thread{
 			public void windowOpened(WindowEvent e) {
 				utility.updateIP(username,ipAddr.getHostAddress());
 				Timer timer=new Timer();
-				timer.schedule(new LogStatus(ipAddr.getHostAddress(),username), 0,1000*30*1);
+				timer.schedule(new AdminLogStatus(ipAddr.getHostAddress(),username), 0,1000*30*1);
 			}
 		});
 		frame.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 14));
-		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(FlagPage.class.getResource("/operator/icon.png")));
+		frame.setIconImage(Toolkit.getDefaultToolkit().getImage(adminpage.class.getResource("/admin/icon.png")));
 		frame.setSize((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight());
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -72,13 +66,12 @@ public class FlagPage extends Thread{
         });
 		frame.getContentPane().setLayout(null);
 		JLabel imglbl=new JLabel();
-		ImageIcon icon=new ImageIcon(FlagPage.class.getResource("/operator/5 (2).jpg"));
+		ImageIcon icon=new ImageIcon(adminpage.class.getResource("/admin/5 (2).jpg"));
 		Image img=icon.getImage();
 		Image image=img.getScaledInstance((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight(), Image.SCALE_SMOOTH);
-		
 		JLabel label = new JLabel("");
 		label.setBounds(889, 97, 233, 60);
-		ImageIcon ico1	=new ImageIcon(FlagPage.class.getResource("/operator/karvygrouplogo.png"));
+		ImageIcon ico1	=new ImageIcon(adminpage.class.getResource("/admin/karvygrouplogo.png"));
 		Image img1=ico1.getImage();
 		Image image2=img1.getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_SMOOTH);
 		
@@ -97,27 +90,38 @@ public class FlagPage extends Thread{
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
 		
-		JMenu mnWork = new JMenu("Work");
+		JMenu mnWork = new JMenu("Bulk Verification");
 		mnWork.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				FlagOperator fo=new FlagOperator(username,ipAddr.getHostAddress(),fullname,empid);
-				fo.start();
-				frame.dispose();
+				BulkUpadate bu=new BulkUpadate(empid,fullname);
+				bu.start();
 			}
 		});
 		mnWork.setForeground(new Color(0, 0, 0));
 		mnWork.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 14));
 		menuBar.add(mnWork);
 		
-		JMenu mnReport = new JMenu("Report");
+		JMenu mnReport = new JMenu("Create User");
 		mnReport.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				OperatorPage op=new OperatorPage(username,ipAddr.getHostAddress(),fullname,empid);
-				op.start();
+				CreateUser cu=new CreateUser(fullname,empid);
+				cu.start();
 			}
 		});
+		
+		JMenu menu = new JMenu("Report");
+		menu.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				AdminReport ar=new AdminReport(fullname);
+				ar.start();
+			}
+		});
+		menu.setForeground(Color.BLACK);
+		menu.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 14));
+		menuBar.add(menu);
 		mnReport.setForeground(Color.BLACK);
 		mnReport.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 14));
 		menuBar.add(mnReport);

@@ -21,13 +21,13 @@ import javax.swing.JOptionPane;
 import utility.DataUtility;
 import javax.swing.JScrollPane;
 import javax.swing.border.Border;
-import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JComboBox;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -37,13 +37,14 @@ import javax.swing.DefaultListModel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-
-import com.itextpdf.text.DocumentException;
 
 import model.WorkData;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 public class FlagOperator extends Thread{
 	private String username;
@@ -54,11 +55,12 @@ public class FlagOperator extends Thread{
 	private JTextField frominwardno;
 	private JTextField toinwardno;
 	private JTable dataview;
-	private JComboBox comboBox;
+	private JComboBox<String> comboBox;
 	DefaultTableModel model;
 	JLabel totcou;
 	JScrollPane imgview;
-	JList lsm;
+	JList<ImageIcon> lsm;
+	File tmp=new File("C:\\temp2");
 	
 	public FlagOperator(String username, String hostAddress, String fullname, String empid) {
 		this.fullname=fullname;
@@ -168,16 +170,11 @@ public class FlagOperator extends Thread{
 				if(model.getRowCount()<=0) {
 					JOptionPane.showMessageDialog(null, "No Data Available in Table", "Info", JOptionPane.INFORMATION_MESSAGE);
 				} else {
-					int urec=utility.SaveData(model.getValueAt(0, 0),model.getValueAt(0, 1));
-					if(urec==1) {
-						model.removeRow(dataview.getSelectedRow());
-						dataview.setRowSelectionInterval(0, 0);
-						if(model.getRowCount()>0) {
-							dataprocess(model.getValueAt(0, 0),model.getValueAt(0, 1));
-						}
-						
-					} else if(urec==2) {
-						JOptionPane.showMessageDialog(null, "Database Error", "Info", JOptionPane.INFORMATION_MESSAGE);
+					utility.SaveData(model.getValueAt(0, 0),model.getValueAt(0, 1));
+					model.removeRow(dataview.getSelectedRow());
+					dataview.setRowSelectionInterval(0, 0);
+					if(model.getRowCount()>0) {
+						dataprocess(model.getValueAt(0, 0),model.getValueAt(0, 1));
 					}
 				}
 			}
@@ -215,21 +212,21 @@ public class FlagOperator extends Thread{
 		btnReject.setForeground(new Color(102, 0, 0));
 		btnReject.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 13));
 		btnReject.setBackground(new Color(224, 255, 255));
-		btnReject.setBounds((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth()-115, 127, 81, 23);
+		btnReject.setBounds((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth()-125, 176, 89, 22);
 		frame.getContentPane().add(btnReject);
 		
-		comboBox = new JComboBox();
+		comboBox = new JComboBox<String>();
 		comboBox.setBackground(new Color(255, 255, 255));
 		comboBox.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 12));
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"Rejection Type"}));
-		comboBox.setBounds((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth()-280, 128, 155, 20);
+		comboBox.setModel(new DefaultComboBoxModel<String>(new String[] {"Rejection Type"}));
+		comboBox.setBounds((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth()-320, 128, 275, 20);
 		frame.getContentPane().add(comboBox);
 		
-		JLabel lblType = new JLabel("Type:");
-		lblType.setForeground(new Color(102, 0, 0));
-		lblType.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 13));
-		lblType.setBounds((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth()-330, 130, 46, 14);
-		frame.getContentPane().add(lblType);
+//		JLabel lblType = new JLabel("Type:");
+//		lblType.setForeground(new Color(102, 0, 0));
+//		lblType.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 13));
+//		lblType.setBounds((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth()-330, 130, 46, 14);
+//		frame.getContentPane().add(lblType);
 		
 		JButton btnSubmit = new JButton("Submit");
 		btnSubmit.addActionListener(new ActionListener() {
@@ -240,7 +237,6 @@ public class FlagOperator extends Thread{
 					frominwardno.requestFocus();
 				} else if (toinwardno.getText().trim().isEmpty()) {
 					JOptionPane.showMessageDialog(null, "Please enter To Inward No", "Info", JOptionPane.INFORMATION_MESSAGE);
-					toinwardno.requestFocus();
 				} else {
 					model=(DefaultTableModel) dataview.getModel();
 					model.setRowCount(0);
@@ -254,12 +250,14 @@ public class FlagOperator extends Thread{
 					}
 					dataview.setRowSelectionInterval(0, 0);
 					model=(DefaultTableModel) dataview.getModel();
-					System.out.println("Mannu Table Inward No:"+model.getValueAt(0, 0)+"_"+model.getValueAt(0, 1));
 					dataprocess(model.getValueAt(0, 0),model.getValueAt(0, 1));
 					
 				}
 			}
+
+			
 		});
+		
 		btnSubmit.setBackground(new Color(224, 255, 255));
 		btnSubmit.setForeground(new Color(102, 0, 0));
 		btnSubmit.setFont(new Font("Bookman Old Style", Font.BOLD | Font.ITALIC, 13));
@@ -337,40 +335,29 @@ public class FlagOperator extends Thread{
 		imglbl.setIcon(new ImageIcon(image));
 		imglbl.setSize(frame.getWidth(), frame.getHeight());
 		frame.getContentPane().add(imglbl);
+				
 		frame.setVisible(true);
 	}
 
 	protected void dataprocess(Object inwardno, Object ackno) {
 		List<String> filepath=utility.getFilePath(ackno.toString());
-		System.out.println("Size: "+filepath.size());
 		if(filepath.size()==0) {
 			JOptionPane.showMessageDialog(null, "Image Not Found", "Info", JOptionPane.INFORMATION_MESSAGE);
-//			DefaultListModel lm=new DefaultListModel();
-//			lm=(DefaultListModel) lsm.getModel();
-//			if(lm.size()>0) {
-//				lm.removeAllElements();
-//			}
-			
 		} else if (filepath.size()>0) {
-			DefaultListModel listModel = new DefaultListModel();
+			DefaultListModel<ImageIcon> listModel = new DefaultListModel<ImageIcon>();
 			listModel.removeAllElements();
-			int count = 0;
 			for (int i = 0; i < filepath.size(); i++) {
 				try {
-					BufferedImage img=ImageIO.read(new File(filepath.get(i).toString()));
-					Image img1=img.getScaledInstance(imgview.getWidth()-50, 600, Image.SCALE_SMOOTH);
-					ImageIcon ico=new ImageIcon(img1);
-					listModel.add(count++, ico);
-//					ImageIcon ii = new ImageIcon(ImageIO.read(new File(filepath.get(i).toString())));
-//					Image image=ii.getImage();
-//			        Image img=image.getScaledInstance(imgview.getWidth()-50, 600, Image.SCALE_SMOOTH);
-//			        ImageIcon ico=new ImageIcon(img);
-//			        listModel.add(count++, ico);
+					ImageIcon ii = new ImageIcon(ImageIO.read(new File(filepath.get(i))));
+					Image image=ii.getImage();
+			        Image img=image.getScaledInstance(imgview.getWidth()-60, (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight()-100, Image.SCALE_SMOOTH);
+			        ImageIcon ico=new ImageIcon(img);
+			        listModel.add(i, ico);
 				} catch (IOException e) {
-					e.printStackTrace();
+						e.printStackTrace();
 				}
 			}
-			lsm = new JList(listModel);
+			lsm = new JList<ImageIcon>(listModel);
 		    lsm.setVisibleRowCount(1);
 		    imgview.setViewportView(lsm);
 		}
@@ -389,5 +376,5 @@ public class FlagOperator extends Thread{
 		} else if (exppass==JOptionPane.NO_OPTION) {
 			System.out.println("No Option");
 		}
-	}
+	}	
 }

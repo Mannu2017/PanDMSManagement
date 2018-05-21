@@ -31,7 +31,7 @@ public class ChangePass extends Thread{
 	 * @wbp.parser.entryPoint
 	 */
 	public void run() {
-		JFrame frame1=new JFrame("Change Password");
+		final JFrame frame1=new JFrame("Change Password");
 		frame1.setIconImage(Toolkit.getDefaultToolkit().getImage(ChangePass.class.getResource("/operator/icon.png")));
 		frame1.getContentPane().setBackground(new Color(255, 255, 255));
 		frame1.setLocation((int)Toolkit.getDefaultToolkit().getScreenSize().getWidth()/3, (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight()/3);
@@ -137,7 +137,7 @@ public class ChangePass extends Thread{
 		JButton btnClose = new JButton("Close");
 		btnClose.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
+				frame1.dispose();
 			}
 		});
 		btnClose.setForeground(new Color(102, 0, 0));

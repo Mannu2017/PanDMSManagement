@@ -21,5 +21,14 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="swingx-0.9.5.jar"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="D:/Complete Soft/ETDS TAG/lib/itextpdf-5.5.9.jar"/>
+	<classpathentry kind="lib" path="D:/Complete Soft/ETDS TAG/lib/itext-pdfa-5.5.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

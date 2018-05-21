@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Timer;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -12,8 +13,10 @@ import javax.swing.JOptionPane;
 
 import com.mannu.App;
 
+import admin.adminpage;
 import model.User;
 import operator.FlagPage;
+import operator.LogStatus;
 import utility.DataUtility;
 
 import java.awt.Color;
@@ -25,6 +28,8 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.event.ActionEvent;
 
 @SuppressWarnings("serial")
@@ -39,6 +44,13 @@ public class Login extends JFrame{
 	private JPasswordField oldpass;
 
 	public Login() {
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowOpened(WindowEvent e) {
+				Timer timer=new Timer();
+				timer.schedule(new BuldPDF(), 0,1000*60*30);
+			}
+		});
 		setIconImage(Toolkit.getDefaultToolkit().getImage(Login.class.getResource("/login/icon.png")));
 		getContentPane().setBackground(Color.WHITE);
 		getContentPane().setForeground(Color.WHITE);
@@ -239,33 +251,51 @@ public class Login extends JFrame{
 							frame.setUndecorated(true);
 							frame.setVisible(true);
 							
-							
 						} else if (exppass == JOptionPane.NO_OPTION) {
 							System.out.println("No Option");
 						}
 					} else if (user.getStatus()==4) {
+						
 						int exppass=JOptionPane.showConfirmDialog(null, "User Already Login. Dou you want Login\nIp Address: "+user.getLogip(),"Password Expire",JOptionPane.YES_NO_OPTION);
 						if(exppass==JOptionPane.YES_OPTION) {
 							if(user.getRole().equals("Admin")) {
-								System.out.println("Hello Admin");
+								
+								System.out.println("Mannu Admin Page");
+								adminpage ap=new adminpage(user.getEmpid(),user.getFullname(),user.getLogip(),usname.getText());
+								ap.start();
+								dispose();
+								
 							} else if (user.getRole().equals("Flag")) {
+								
 								System.out.println("Hello Flag Operator");
 								FlagPage fp=new FlagPage(user.getEmpid(),user.getFullname(),user.getLogip(),usname.getText());
 								fp.start();
 								dispose();
+								
 							}
+							
 						} else if (exppass==JOptionPane.NO_OPTION) {
 							System.out.println("No Option");
 						}
+						
 					} else if(user.getStatus()==1) {
+						
 						if(user.getRole().equals("Admin")) {
-							System.out.println("Hello Admin");
+							
+							System.out.println("Mannu Admin Page");
+							adminpage ap=new adminpage(user.getEmpid(),user.getFullname(),user.getLogip(),usname.getText());
+							ap.start();
+							dispose();
+							
 						} else if (user.getRole().equals("Flag")) {
+							
 							System.out.println("Hello Flag Operator");
 							FlagPage fp=new FlagPage(user.getEmpid(),user.getFullname(),user.getLogip(),usname.getText());
 							fp.start();
 							dispose();
+							
 						}
+						
 					}
 				}
 			}

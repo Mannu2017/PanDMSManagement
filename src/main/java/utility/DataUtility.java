@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Connection.DbCon;
+import model.Report;
 import model.User;
 import model.WorkData;
 
@@ -200,8 +201,8 @@ public class DataUtility {
 			}
 			ResultSet rs=null;
 			CallableStatement cb=con.prepareCall("{call WorkAssignNSDL (?,?,?)}");
-			cb.setString(1, text);
-			cb.setString(2, text2);
+			cb.setInt(1, Integer.parseInt(text));
+			cb.setInt(2, Integer.parseInt(text2));
 			cb.setString(3, empid);
 			boolean results=cb.execute();
 			int rowef=0;
@@ -271,8 +272,6 @@ public class DataUtility {
 			if(con.isClosed()) {
 				con=DbCon.DbCon();
 			}
-			System.out.println("ack: "+inward.toString()+"^"+ack.toString());
-			
 			PreparedStatement ps=con.prepareStatement("update PanNSDLWorkAssign set WorkStatis=1,UpdateDateTime=GETDATE() where InwardNo='"+inward.toString()+"' and AckNo='"+ack.toString()+"'");
 			boolean rs=ps.execute();
 			if(rs=true) {
@@ -294,8 +293,6 @@ public class DataUtility {
 			if(con.isClosed()) {
 				con=DbCon.DbCon();
 			}
-			System.out.println("ack: "+inward.toString()+"^"+ack.toString());
-			
 			PreparedStatement ps=con.prepareStatement("update PanNSDLWorkAssign set WorkStatis=3,rejid='"+Reject.toString()+"',RejdateTime=GETDATE() where InwardNo='"+inward.toString()+"' and AckNo='"+ack.toString()+"'");
 			boolean rs=ps.execute();
 			if(rs=true) {
@@ -311,4 +308,147 @@ public class DataUtility {
 		return sta;
 	}
 
+	public List<Report> OpWorkReport(String fdate, String tdate, String empid) {
+		List<Report> reports=new ArrayList<Report>();
+		Report report=null;
+		try {
+			if(con.isClosed()) {
+				con=DbCon.DbCon();
+			}
+			ResultSet rs=null;
+			CallableStatement cb=con.prepareCall("{call OpReport (?,?,?)}",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
+			cb.setString(1,  fdate.toString());
+			cb.setString(2,  tdate.toString());
+			cb.setString(3,  empid.toString());
+			boolean result=cb.execute();
+			int roweff=0;
+			while (result || roweff !=-1) {
+				if(result) {
+					rs=cb.getResultSet();
+					break;
+				} else {
+					roweff=cb.getUpdateCount();
+				}
+				result=cb.getMoreResults();
+			}
+			while (rs.next()) {
+				report=new Report();
+				report.setDate(rs.getString(1));
+				report.setTotalack(rs.getInt(2));
+				report.setPending(rs.getInt(3));
+				report.setComplete(rs.getInt(4));
+				report.setReject(rs.getInt(5));
+				reports.add(report);
+			}
+			cb.close();
+			rs.close();
+			con.close();
+		} catch (Exception e) {
+			return reports;
+		}
+		return reports;
+	}
+
+	public int newUser(String email, String username, String fullname, String usempid, String confpass, String role, String empid) {
+		int sta=0;
+		try {
+			if(con.isClosed()) {
+				con=DbCon.DbCon();
+			}
+			String enpass=username+confpass;
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			md.update(enpass.getBytes());
+			byte[] bytes = md.digest();
+			StringBuilder sb = new StringBuilder();
+			for(int i=0; i< bytes.length ;i++)
+            {
+                sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+			ResultSet rs=null;
+			CallableStatement cs=con.prepareCall("{call adduser (?,?,?,?,?,?,?)}");
+			cs.setString(1, username);
+			cs.setString(2, sb.toString());
+			cs.setString(3, fullname);
+			cs.setString(4, usempid);
+			cs.setString(5, email);
+			cs.setString(6, role);
+			cs.setString(7, empid);
+			boolean st=cs.execute();
+			int roweff=0;
+			while (st || roweff !=-1) {
+				if(st) {
+					rs=cs.getResultSet();
+					break;
+				} else {
+					roweff=cs.getUpdateCount();
+				}
+				st=cs.getMoreResults();
+			}
+			while (rs.next()) {
+				sta=rs.getInt(1);
+			}
+			cs.close();
+			rs.close();
+			con.close();
+		} catch (Exception e) {
+			return sta;
+		}
+		return sta;
+	}
+
+	public List<Report> AdminReport(String fdate, String tdate) {
+		List<Report> reports=new ArrayList<Report>();
+		Report report=null;
+		try {
+			if(con.isClosed()) {
+				con=DbCon.DbCon();
+			}
+			ResultSet rs=null;
+			CallableStatement cb=con.prepareCall("{call Adminrepo (?,?)}",ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
+			cb.setString(1,  fdate.toString());
+			cb.setString(2,  tdate.toString());
+			boolean result=cb.execute();
+			int roweff=0;
+			while (result || roweff !=-1) {
+				if(result) {
+					rs=cb.getResultSet();
+					break;
+				} else {
+					roweff=cb.getUpdateCount();
+				}
+				result=cb.getMoreResults();
+			}
+			while (rs.next()) {
+				report=new Report();
+				report.setEmpid(rs.getString(1));
+				report.setFullname(rs.getString(2));
+				report.setDate(rs.getString(3));
+				report.setTotalack(rs.getInt(4));
+				report.setPending(rs.getInt(5));
+				report.setComplete(rs.getInt(6));
+				report.setReject(rs.getInt(7));
+				reports.add(report);
+			}
+			cb.close();
+			rs.close();
+			con.close();
+		} catch (Exception e) {
+			return reports;
+		}
+		return reports;
+	}
+
+	public void adminUpdate(String string) {
+		try {
+			if(con.isClosed()) {
+				con=DbCon.DbCon();
+			}
+			PreparedStatement ps=con.prepareStatement("update inward set NsdlUploadStatus=1 where Ackno='"+string+"'");
+			ps.execute();
+			ps.close();
+			con.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
