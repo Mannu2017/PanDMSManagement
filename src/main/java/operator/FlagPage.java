@@ -19,6 +19,7 @@ import utility.DataUtility;
 
 import javax.swing.JMenu;
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.KeyEvent;
@@ -101,8 +102,17 @@ public class FlagPage extends Thread{
 		mnWork.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				FlagOperator fo=new FlagOperator(username,ipAddr.getHostAddress(),fullname,empid);
-				fo.start();
+				
+//				FlagOperator fo=new FlagOperator(username,ipAddr.getHostAddress(),fullname,empid);
+				EventQueue.invokeLater(new Runnable() {
+					
+					public void run() {
+						new FlagOperator(username,ipAddr.getHostAddress(),fullname,empid).setVisible(true);
+					}
+				});
+				
+				
+				
 				frame.dispose();
 			}
 		});

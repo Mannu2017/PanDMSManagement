@@ -28,7 +28,9 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="D:/Complete Soft/ETDS TAG/lib/itextpdf-5.5.9.jar"/>
-	<classpathentry kind="lib" path="D:/Complete Soft/ETDS TAG/lib/itext-pdfa-5.5.2.jar"/>
+	<classpathentry kind="lib" path="E:/Support/icepdf-core-6.1.2.jar"/>
+	<classpathentry kind="lib" path="E:/Support/icepdf-viewer-6.1.2.jar"/>
+	<classpathentry kind="lib" path="E:/Complete Soft/ETDS TAG/lib/itextpdf-5.5.9.jar"/>
+	<classpathentry kind="lib" path="E:/Complete Soft/ETDS TAG/lib/itext-pdfa-5.5.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
